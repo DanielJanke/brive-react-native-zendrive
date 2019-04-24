@@ -1,20 +1,36 @@
-import com.zendrive.sdk.*;
+package com.reactlibrary;
 
-public class MyZendriveNotificationProvider extends ZendriveNotificationProvider {
+import android.support.annotation.NonNull;
+import android.content.Context;
+import com.zendrive.sdk.ZendriveNotificationContainer;
+import com.zendrive.sdk.ZendriveNotificationProvider;
 
-    // Must have a default constructor
+import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReactContextBaseJavaModule;
 
-    @Override
-    @RequiresApi(Build.VERSION_CODES.O)
+import android.support.v4.app.NotificationCompat;
+
+public class MyZendriveNotificationProvider implements ZendriveNotificationProvider{
+
+    public MyZendriveNotificationProvider() {
+        super();
+      }
+
+    // @Override
     @NonNull
     public ZendriveNotificationContainer getMaybeInDriveNotificationContainer(@NonNull Context context) { 
-    
+        return new ZendriveNotificationContainer(
+            1,
+            new NotificationCompat.Builder(context, "Foreground").build()
+        );
     }
 
-    @Override
+    // @Override
     @NonNull
     public ZendriveNotificationContainer getInDriveNotificationContainer(@NonNull Context context) {
-
+        return new ZendriveNotificationContainer(
+            1,
+            new NotificationCompat.Builder(context, "Foreground").build()
+        );
     }
-
 }

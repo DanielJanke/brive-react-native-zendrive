@@ -1,0 +1,1 @@
+export function setup(sdkApplicationKey: string, driverId: string, firstName: string, lastName: string, group: string, successCallback: () => void, errorCallback: () => void);
