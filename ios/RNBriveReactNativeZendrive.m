@@ -14,7 +14,37 @@ RCT_ENUM_CONVERTER(ZendriveDriveDetectionMode, (@{ @"ZendriveDriveDetectionModeA
 
 @implementation RNBriveReactNativeZendrive
 
+- (NSString*)formatEventSupport:(NSString*)eventType {
+    NSString *result = nil;
 
+        switch ([eventType intValue]) {
+            case 0:
+                result = @"ZendriveEventHardBrake";
+                break;
+            case 1:
+                result = @"ZendriveEventAggressiveAcceleration";
+                break;
+            case 2:
+                result = @"ZendriveEventPhoneHandling";
+                break;
+            case 3:
+                result = @"ZendriveEventOverSpeeding";
+                break;
+            case 4:
+                result = @"ZendriveEventAccident";
+                break;
+            case 5:
+                result = @"ZendriveEventHardTurn";
+                break;
+            case 6:
+                result = @"ZendriveEventPhoneScreenInteraction";
+                break;
+        default:
+            result = @"Unexpected FormatType";
+            break;
+    }
+    return result;
+};
 
 - (dispatch_queue_t)methodQueue
 {
@@ -47,8 +77,10 @@ RCT_EXPORT_METHOD(setup:
     configuration.driverId = driverId; // REQUIRED
 
     ZendriveDriverAttributes *driverAttributes = [[ZendriveDriverAttributes alloc] init];
-    [driverAttributes setFirstName: firstName];
-    [driverAttributes setLastName: lastName];
+    
+    [driverAttributes setCustomAttribute:firstName forKey:@"firstName"];
+    [driverAttributes setCustomAttribute:lastName forKey:@"fastName"];
+    
     [driverAttributes setGroup: group];
     
     configuration.driverAttributes = driverAttributes;
@@ -93,7 +125,15 @@ RCT_EXPORT_METHOD(
 )
 {
     RCTLogInfo(@"startDrive");
-    [Zendrive startDrive:trackingId];
+    [Zendrive startManualDrive:trackingId completionHandler:^(BOOL success, NSError *error) {
+        if(success) {
+            RCTLogInfo(@"setup sucess");
+//            successCallback(@[[NSNull null]]);
+        } else {
+            RCTLogInfo(@"setup error");
+//            errorCallback(@[[NSNull null]]);
+        }
+    }];
 }
 
 RCT_EXPORT_METHOD(
@@ -101,7 +141,15 @@ RCT_EXPORT_METHOD(
 )
 {
     RCTLogInfo(@"stopDrive");
-    [Zendrive stopManualDrive];
+    [Zendrive stopManualDrive:^(BOOL success, NSError *error) {
+        if(success) {
+            RCTLogInfo(@"setup sucess");
+//            successCallback(@[[NSNull null]]);
+        } else {
+            RCTLogInfo(@"setup error");
+//            errorCallback(@[[NSNull null]]);
+        }
+    }];
 }
 
 
@@ -120,20 +168,36 @@ RCT_EXPORT_METHOD(getEventSupportForDevice:(RCTResponseSenderBlock)callback)
     NSMutableDictionary *eventSupportConverted = [[NSMutableDictionary alloc] init];
     NSUInteger count = 0;
     
-    for (id key in eventSupport) {
-        [eventSupportConverted setObject:[eventSupport objectForKey:key] forKey:[@(count) stringValue]];
-//        [eventSupportConverted setValue:[eventSupport objectForKey:key] forKey:[@(count) stringValue]];
+    RCTLogInfo(@"My dictionary is %@", eventSupport);
+    
+    for (NSString* key in eventSupport) {
+        
+        RCTLogInfo(@"KEY");
+        RCTLogInfo(@"%@", key);
+        NSString* convertedEventSupportType = [self formatEventSupport:key];
+        RCTLogInfo(@"%@", convertedEventSupportType);
+        [eventSupportConverted setObject:[eventSupport objectForKey:key] forKey:convertedEventSupportType];
         count++;
-//        RCTLogInfo([]);
+//       RCTLogInfo(eventSupportConverted);
+        
     }
-    callback(@[[NSNull null], eventSupportConverted]);
+//    callback(@[[NSNull null], eventSupportConverted]);
+        callback(@[eventSupportConverted]);
 }
 
 RCT_EXPORT_METHOD(
                   setDriveDetectionMode:(ZendriveDriveDetectionMode)ZendriveDriveDetectionMode
 )
 {
-    [Zendrive setDriveDetectionMode:ZendriveDriveDetectionMode];
+    [Zendrive setDriveDetectionMode:ZendriveDriveDetectionMode completionHandler:^(BOOL success, NSError *error) {
+        if(success) {
+            RCTLogInfo(@"setup sucess");
+//            successCallback(@[[NSNull null]]);
+        } else {
+            RCTLogInfo(@"setup error");
+//            errorCallback(@[[NSNull null]]);
+        }
+    }];
 }
 
 RCT_EXPORT_METHOD(
@@ -145,6 +209,7 @@ RCT_EXPORT_METHOD(
         
     }];
 }
+
 
 
 @end
