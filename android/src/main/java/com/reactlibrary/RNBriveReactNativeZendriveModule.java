@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.HashMap;
 
 import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.Callback;
@@ -15,8 +16,12 @@ import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.Arguments;
 
 import com.reactlibrary.MyZendriveNotificationProvider;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
+
 
 import com.zendrive.sdk.*;
+
+import javax.annotation.Nullable;
 
 public class RNBriveReactNativeZendriveModule extends ReactContextBaseJavaModule {
 
@@ -54,12 +59,13 @@ public class RNBriveReactNativeZendriveModule extends ReactContextBaseJavaModule
 
     driverAttributes.setCustomAttribute("firstName", firstName);
     driverAttributes.setCustomAttribute("lastName", lastName);
+    driverAttributes.setAlias(firstName + " " + lastName);
     driverAttributes.setGroup(group);
     
     ZendriveConfiguration zendriveConfiguration = new ZendriveConfiguration(sdkApplicationKey, driverId);
     zendriveConfiguration.setDriverAttributes(driverAttributes);
 
-    Zendrive.setup(this.reactContext, zendriveConfiguration, null, MyZendriveNotificationProvider.class,
+    Zendrive.setup(this.reactContext, zendriveConfiguration, MyZendriveBroadcastReceiver.class, MyZendriveNotificationProvider.class,
     new ZendriveOperationCallback() {
         @Override
         public void onCompletion(ZendriveOperationResult result) {
@@ -129,6 +135,22 @@ public class RNBriveReactNativeZendriveModule extends ReactContextBaseJavaModule
   }
 
   @ReactMethod
+  public void activeDriveInfo(
+    final Callback callback
+  ) {
+    ActiveDriveInfo activeDriveInfo = Zendrive.getActiveDriveInfo(this.reactContext);
+    // String activeDriveInfo = Zendrive.getBuildVersion();
+
+    if(activeDriveInfo == null) {
+      callback.invoke(null);
+    } else {
+      callback.invoke(null, activeDriveInfo.driveId);
+    }
+  
+    // callback.invoke(activeDriveInfo.driveId, activeDriveInfo.driveId);
+  }
+
+  @ReactMethod
   public void startSession(
     String sessionId
   ) {
@@ -148,6 +170,87 @@ public class RNBriveReactNativeZendriveModule extends ReactContextBaseJavaModule
   {
     boolean isSDKSetup = Zendrive.isSDKSetup(this.reactContext);
     callback.invoke(isSDKSetup);
+  }
+
+  @ReactMethod
+  public void getZendriveSettings(
+    final Callback callback
+  ) {
+    Zendrive.getZendriveSettings(this.reactContext, new ZendriveSettingsCallback() {
+        public void onComplete(ZendriveSettings zendriveSettings) {
+          WritableArray map = Arguments.createArray();
+          if (zendriveSettings == null) {
+            callback.invoke(null);
+          }
+          else {
+            for (ZendriveSettingError error : zendriveSettings.errors) {
+                switch (error.type) {
+                    case POWER_SAVER_MODE_ENABLED: {
+                        map.pushString("POWER_SAVER_MODE_ENABLED");
+                        break;
+                    }
+                    case BACKGROUND_RESTRICTION_ENABLED: {
+                        map.pushString("BACKGROUND_RESTRICTION_ENABLED");
+                        break;
+                    }
+                    case GOOGLE_PLAY_SETTINGS_ERROR: {
+                        map.pushString("GOOGLE_PLAY_SETTINGS_ERROR");
+                        break;
+                    }
+                    case GOOGLE_PLAY_CONNECTION_ERROR: {
+                        map.pushString("GOOGLE_PLAY_CONNECTION_ERROR");
+                        break;
+                    }
+                    case LOCATION_PERMISSION_DENIED: {
+                        map.pushString("LOCATION_PERMISSION_DENIED");
+                        break;
+                    }
+                    case LOCATION_SETTINGS_ERROR: {
+                        map.pushString("LOCATION_SETTINGS_ERROR");
+                        break;
+                    }
+                    case WIFI_SCANNING_DISABLED: {
+                        map.pushString("WIFI_SCANNING_DISABLED");
+                        break;
+                    }
+                }
+            }
+            for (ZendriveSettingWarning warning: zendriveSettings.warnings) {
+                switch (warning.type) {
+                    case POWER_SAVER_MODE_ENABLED: {
+                        map.pushString("POWER_SAVER_MODE_ENABLED");
+                        break;
+                    }
+                    case BACKGROUND_RESTRICTION_ENABLED: {
+                        map.pushString("BACKGROUND_RESTRICTION_ENABLED");
+                        break;
+                    }
+                    case GOOGLE_PLAY_SETTINGS_ERROR: {
+                        map.pushString("GOOGLE_PLAY_SETTINGS_ERROR");
+                        break;
+                    }
+                    case GOOGLE_PLAY_CONNECTION_ERROR: {
+                        map.pushString("GOOGLE_PLAY_CONNECTION_ERROR");
+                        break;
+                    }
+                    case LOCATION_PERMISSION_DENIED: {
+                        map.pushString("LOCATION_PERMISSION_DENIED");
+                        break;
+                    }
+                    case LOCATION_SETTINGS_ERROR: {
+                        map.pushString("LOCATION_SETTINGS_ERROR");
+                        break;
+                    }
+                    case WIFI_SCANNING_DISABLED: {
+                        map.pushString("WIFI_SCANNING_DISABLED");
+                        break;
+                    }
+                }
+            }
+              callback.invoke(map);
+          }
+        }
+    });
   }
 
   @ReactMethod
@@ -174,4 +277,6 @@ public class RNBriveReactNativeZendriveModule extends ReactContextBaseJavaModule
     callback.invoke(map);
   }
 
+
 }
+

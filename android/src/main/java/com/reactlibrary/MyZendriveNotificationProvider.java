@@ -12,6 +12,7 @@ import android.support.v4.app.NotificationCompat;
 
 public class MyZendriveNotificationProvider implements ZendriveNotificationProvider{
 
+
     public MyZendriveNotificationProvider() {
         super();
       }
@@ -21,7 +22,7 @@ public class MyZendriveNotificationProvider implements ZendriveNotificationProvi
     public ZendriveNotificationContainer getMaybeInDriveNotificationContainer(@NonNull Context context) { 
         return new ZendriveNotificationContainer(
             1,
-            new NotificationCompat.Builder(context, "Foreground").build()
+            new NotificationCompat.Builder(context, "Foreground").setContentText("BRIVE Fahrt läuft").build()
         );
     }
 
@@ -30,7 +31,7 @@ public class MyZendriveNotificationProvider implements ZendriveNotificationProvi
     public ZendriveNotificationContainer getInDriveNotificationContainer(@NonNull Context context) {
         return new ZendriveNotificationContainer(
             1,
-            new NotificationCompat.Builder(context, "Foreground").build()
+            new NotificationCompat.Builder(context, "Foreground").setContentText("BRIVE Fahrt läuft").build()
         );
     }
 }

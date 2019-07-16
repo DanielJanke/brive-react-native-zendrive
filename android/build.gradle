@@ -37,6 +37,6 @@ repositories {
 
 dependencies {
     compile 'com.facebook.react:react-native:+'
-    compile 'com.zendrive.sdk.android:ZendriveSDK:5.9.1'
+    implementation 'com.zendrive.sdk.android:ZendriveSDK:5.10.0'
 }
   

@@ -5,7 +5,7 @@
 #import <React/RCTConvert.h>
 
 @implementation RCTConvert (ZendriveDriveDetectionMode)
-RCT_ENUM_CONVERTER(ZendriveDriveDetectionMode, (@{ @"ZendriveDriveDetectionModeAutoON" : @(ZendriveDriveDetectionModeAutoON),
+RCT_ENUM_CONVERTER(ZendriveDriveDetectionMode, (@{ @"ZendriveDriveDetectionModeAutoOn" : @(ZendriveDriveDetectionModeAutoON),
                                                    @"ZendriveDriveDetectionModeAutoOff" : @(ZendriveDriveDetectionModeAutoOFF),
                                              }),
                    ZendriveDriveDetectionModeAutoON, integerValue)
@@ -53,7 +53,7 @@ RCT_ENUM_CONVERTER(ZendriveDriveDetectionMode, (@{ @"ZendriveDriveDetectionModeA
 
 - (NSDictionary *)constantsToExport
 {
-    return @{ @"ZendriveDriveDetectionModeAutoON" : @(ZendriveDriveDetectionModeAutoON),
+    return @{ @"ZendriveDriveDetectionModeAutoOn" : @(ZendriveDriveDetectionModeAutoON),
               @"ZendriveDriveDetectionModeAutoOff" : @(ZendriveDriveDetectionModeAutoOFF),
                };
 };
@@ -75,17 +75,15 @@ RCT_EXPORT_METHOD(setup:
     ZendriveConfiguration *configuration = [[ZendriveConfiguration alloc] init];
     configuration.applicationKey = sdkApplicationKey; // REQUIRED. This is your Zendrive SDK key.
     configuration.driverId = driverId; // REQUIRED
+    configuration.driveDetectionMode = ZendriveDriveDetectionModeAutoON;
 
     ZendriveDriverAttributes *driverAttributes = [[ZendriveDriverAttributes alloc] init];
     
-    [driverAttributes setCustomAttribute:firstName forKey:@"firstName"];
-    [driverAttributes setCustomAttribute:lastName forKey:@"fastName"];
-    
+    [driverAttributes setAlias: [NSString stringWithFormat:@"%@ %@", firstName, lastName]];
     [driverAttributes setGroup: group];
     
     configuration.driverAttributes = driverAttributes;
     
-    // configuration.driveDetectionMode = ZendriveDriveDetectionModeAutoOFF;
 
     [Zendrive setupWithConfiguration:configuration
                             delegate:nil // Can be nil
@@ -158,7 +156,6 @@ RCT_EXPORT_METHOD(
 {
     bool isSDKSetup = [Zendrive isSDKSetup];
     successCallback(@[[NSNull null], [NSNumber numberWithBool:isSDKSetup]]);
-    
 }
 
 
@@ -198,6 +195,21 @@ RCT_EXPORT_METHOD(
 //            errorCallback(@[[NSNull null]]);
         }
     }];
+}
+
+RCT_EXPORT_METHOD(
+    activeDriveInfo:(RCTResponseSenderBlock)successCallback
+) {
+    RCTLogInfo(@"activeDriveInfo");
+    ZendriveActiveDriveInfo *activeDriveInfo = [Zendrive activeDriveInfo];
+    if (activeDriveInfo == nil) {
+        RCTLogInfo(@"activeDriveInfo == Nil");
+        successCallback(@[[NSNull null]]);
+    }
+    else {
+        RCTLogInfo(activeDriveInfo.driveId);
+        successCallback(@[[NSNull null], activeDriveInfo.driveId]);
+    }
 }
 
 RCT_EXPORT_METHOD(
