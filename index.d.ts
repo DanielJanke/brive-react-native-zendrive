@@ -1,5 +1,5 @@
 declare module 'RNBriveReactNativeZendrive' {
-  export interface RNBriveReactNativeZendriveStatic {
+  export interface RNBriveReactNativeZendrive {
     setup(sdkApplicationKey: string, driverId: string, firstName: string, lastName: string, group: string, successCallback: () => void, errorCallback: () => void): void;
     startSession(sessionId: string):void;
     stopSession():void;
@@ -10,5 +10,7 @@ declare module 'RNBriveReactNativeZendrive' {
     setDriveDetectionMode(setDriveDetectionMode: string):void;
     teardown():void;
   }
+
+  export default RNBriveReactNativeZendrive
 }
 
