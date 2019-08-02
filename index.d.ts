@@ -1,4 +1,4 @@
-declare module 'RNBriveReactNativeZendrive' {
+// declare module 'RNBriveReactNativeZendrive' {
   export interface RNBriveReactNativeZendrive {
     setup(sdkApplicationKey: string, driverId: string, firstName: string, lastName: string, group: string, successCallback: () => void, errorCallback: () => void): void;
     startSession(sessionId: string):void;
@@ -12,5 +12,5 @@ declare module 'RNBriveReactNativeZendrive' {
   }
 
   export default RNBriveReactNativeZendrive
-}
+// }
 

@@ -1,37 +1,31 @@
 package com.reactlibrary;
 
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.content.Context;
+import android.support.annotation.RequiresApi;
+
 import com.zendrive.sdk.ZendriveNotificationContainer;
 import com.zendrive.sdk.ZendriveNotificationProvider;
 
-import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContextBaseJavaModule;
+public class MyZendriveNotificationProvider implements ZendriveNotificationProvider {
 
-import android.support.v4.app.NotificationCompat;
-
-public class MyZendriveNotificationProvider implements ZendriveNotificationProvider{
-
-
-    public MyZendriveNotificationProvider() {
-        super();
-      }
-
-    // @Override
     @NonNull
-    public ZendriveNotificationContainer getMaybeInDriveNotificationContainer(@NonNull Context context) { 
+    @Override
+    @RequiresApi(Build.VERSION_CODES.O)
+    public ZendriveNotificationContainer getMaybeInDriveNotificationContainer(@NonNull Context context) {
         return new ZendriveNotificationContainer(
-            1,
-            new NotificationCompat.Builder(context, "Foreground").setContentText("BRIVE Fahrt läuft").build()
-        );
+                NotificationUtility.FOREGROUND_MODE_NOTIFICATION_ID,
+                NotificationUtility.createMaybeInDriveNotification(context));
     }
 
-    // @Override
     @NonNull
+    @Override
     public ZendriveNotificationContainer getInDriveNotificationContainer(@NonNull Context context) {
         return new ZendriveNotificationContainer(
-            1,
-            new NotificationCompat.Builder(context, "Foreground").setContentText("BRIVE Fahrt läuft").build()
-        );
+                NotificationUtility.FOREGROUND_MODE_NOTIFICATION_ID,
+                NotificationUtility.createInDriveNotification(context));
     }
 }
+
+

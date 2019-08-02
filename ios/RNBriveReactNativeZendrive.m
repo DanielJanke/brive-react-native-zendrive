@@ -2,7 +2,9 @@
 #import "RNBriveReactNativeZendrive.h"
 #import <React/RCTLog.h>
 #import <ZendriveSDK/Zendrive.h>
+#import <ZendriveSDK/ZendriveDebug.h>
 #import <React/RCTConvert.h>
+#import "ZendriveDelegateManager.h"
 
 @implementation RCTConvert (ZendriveDriveDetectionMode)
 RCT_ENUM_CONVERTER(ZendriveDriveDetectionMode, (@{ @"ZendriveDriveDetectionModeAutoOn" : @(ZendriveDriveDetectionModeAutoON),
@@ -10,6 +12,7 @@ RCT_ENUM_CONVERTER(ZendriveDriveDetectionMode, (@{ @"ZendriveDriveDetectionModeA
                                              }),
                    ZendriveDriveDetectionModeAutoON, integerValue)
 @end
+
 
 
 @implementation RNBriveReactNativeZendrive
@@ -84,9 +87,11 @@ RCT_EXPORT_METHOD(setup:
     
     configuration.driverAttributes = driverAttributes;
     
+    id<ZendriveDelegateProtocol> zdDelegate = [[ZendriveDelegateManager alloc] init];
+    self.zendriveDelegate = zdDelegate; // keep a strong reference to the delegate object
 
     [Zendrive setupWithConfiguration:configuration
-                            delegate:nil // Can be nil
+                            delegate:zdDelegate
                             completionHandler:^(BOOL success, NSError *error) {
                        if(success) {
                            RCTLogInfo(@"setup sucess");
@@ -120,18 +125,20 @@ RCT_EXPORT_METHOD(
 RCT_EXPORT_METHOD(
     startDrive:
     (NSString *)trackingId
+  callback:(RCTResponseSenderBlock)callback
 )
 {
     RCTLogInfo(@"startDrive");
     [Zendrive startManualDrive:trackingId completionHandler:^(BOOL success, NSError *error) {
         if(success) {
             RCTLogInfo(@"setup sucess");
-//            successCallback(@[[NSNull null]]);
+            callback(@[@""]);
         } else {
             RCTLogInfo(@"setup error");
-//            errorCallback(@[[NSNull null]]);
+            callback(@[@"Start Drive Error"]);
         }
     }];
+    [self sendEventWithName:@"delegateEvent" body:@{@"message": @"startDrive"}];
 }
 
 RCT_EXPORT_METHOD(
@@ -183,16 +190,19 @@ RCT_EXPORT_METHOD(getEventSupportForDevice:(RCTResponseSenderBlock)callback)
 }
 
 RCT_EXPORT_METHOD(
-                  setDriveDetectionMode:(ZendriveDriveDetectionMode)ZendriveDriveDetectionMode
+                  setDriveDetectionMode:
+                  (ZendriveDriveDetectionMode)ZendriveDriveDetectionMode
+                  callback:(RCTResponseSenderBlock)callback
+                  
 )
 {
     [Zendrive setDriveDetectionMode:ZendriveDriveDetectionMode completionHandler:^(BOOL success, NSError *error) {
         if(success) {
             RCTLogInfo(@"setup sucess");
-//            successCallback(@[[NSNull null]]);
+            callback(@[[NSNull null], @"Success"]);
         } else {
             RCTLogInfo(@"setup error");
-//            errorCallback(@[[NSNull null]]);
+            callback(@[@"Error", [NSNull null]]);
         }
     }];
 }
@@ -204,13 +214,24 @@ RCT_EXPORT_METHOD(
     ZendriveActiveDriveInfo *activeDriveInfo = [Zendrive activeDriveInfo];
     if (activeDriveInfo == nil) {
         RCTLogInfo(@"activeDriveInfo == Nil");
-        successCallback(@[[NSNull null]]);
+        successCallback(@[@"No active drive", [NSNull null]]);
     }
     else {
         RCTLogInfo(activeDriveInfo.driveId);
         successCallback(@[[NSNull null], activeDriveInfo.driveId]);
     }
 }
+
+RCT_EXPORT_METHOD(
+                  getZendriveState:(RCTResponseSenderBlock)successCallback
+  )
+{
+    RCTLogInfo(@"stopSession");
+    [Zendrive getZendriveState:^(ZendriveState * _Nullable zendriveState) {
+        successCallback(@[[NSNumber numberWithBool:zendriveState.isDriveInProgress], [NSNumber numberWithBool:false], @"{}"]);
+    }];
+}
+
 
 RCT_EXPORT_METHOD(
     teardown
@@ -222,7 +243,22 @@ RCT_EXPORT_METHOD(
     }];
 }
 
+RCT_EXPORT_METHOD(
+    debug
+)
+{
 
+}
+
+- (NSArray<NSString *> *)supportedEvents
+{
+    return @[@"delegateEvent"];
+}
+
+- (void)eventReceived:(NSString *)event
+{
+    [self sendEventWithName:@"delegateEvent" body:@{@"message": event}];
+}
 
 @end
   
